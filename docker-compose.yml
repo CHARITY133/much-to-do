@@ -1,41 +1,38 @@
 version: '3.8'
 services:
-  backend:
-    build: .
-    container_name: much-to-do-backend
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017
-      - DB_NAME=muchtodo
-      - PORT=8080
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - app-network
-
   mongodb:
     image: mongo:6.0
-    container_name: much-to-do-db
+    container_name: startuptech-mongodb
     restart: always
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
+      - mongo_data:/data/db
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
-volumes:
-  mongo-data:
-
+  backend:
+    build:
+      context: ./Server/MuchToDo
+      dockerfile: ../../Dockerfile
+    container_name: startuptech-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - MONGO_URI=mongodb://mongodb:27017/muchtodo
+      - DB_NAME=muchtodo
+      - JWT_SECRET_KEY=supersecretkey
+      - JWT_EXPIRATION_HOURS=72
+      - ENABLE_CACHE=false
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+    networks:
+      - app-network
+    depends_on:
+      - mongodb
 networks:
   app-network:
     driver: bridge
+volumes:
+  mongo_data:
