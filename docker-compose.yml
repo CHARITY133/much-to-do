@@ -11,9 +11,7 @@ services:
     networks:
       - app-network
   backend:
-    build:
-      context: ./Server/MuchToDo
-      dockerfile: ../../Dockerfile
+    image: charity111/muchtodo-backend:latest
     container_name: startuptech-backend
     restart: always
     ports:
